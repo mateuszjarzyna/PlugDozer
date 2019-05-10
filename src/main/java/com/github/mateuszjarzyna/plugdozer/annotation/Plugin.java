@@ -13,9 +13,9 @@ import java.lang.annotation.Target;
 public @interface Plugin {
 
     /**
-     * Name of the plugin. Default is full class name
+     * Name of the plugin. Default is full class name (eg. com.github.mateuszjarzyna.plugdozer.manager.PluginManager)
      * @return name of the plugin
      */
-    String value() default "";
+    String name() default "";
 
 }

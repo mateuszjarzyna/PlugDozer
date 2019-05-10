@@ -3,7 +3,6 @@ package com.github.mateuszjarzyna.plugdozer.manager;
 import com.github.mateuszjarzyna.plugdozer.annotation.AnnotationHelper;
 import com.github.mateuszjarzyna.plugdozer.source.PluginSource;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +18,7 @@ public class ManagerHelper {
     }
 
     private static PluginClass toPluginClass(Class<?> clazz) {
-        String name = AnnotationHelper.getName(clazz);
+        String name = AnnotationHelper.getPluginName(clazz);
         return new PluginClass(clazz, name);
     }
 
