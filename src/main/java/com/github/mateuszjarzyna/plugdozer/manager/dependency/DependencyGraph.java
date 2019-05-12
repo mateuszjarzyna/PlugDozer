@@ -1,7 +1,8 @@
-package com.github.mateuszjarzyna.plugdozer.dependency;
+package com.github.mateuszjarzyna.plugdozer.manager.dependency;
 
 import com.github.mateuszjarzyna.plugdozer.annotation.AnnotationHelper;
 import com.github.mateuszjarzyna.plugdozer.exception.CannotResolveDependency;
+import com.github.mateuszjarzyna.plugdozer.exception.CycleInDependencyGraph;
 import com.github.mateuszjarzyna.plugdozer.manager.PluginManager;
 
 import javax.inject.Inject;
@@ -32,25 +33,43 @@ public class DependencyGraph {
     public List<Class<?>> getSortedDependencies() {
         List<Class<?>> sortedDependencies = new ArrayList<>();
         Set<Class<?>> visited = new HashSet<>();
+        Stack<Class<?>> stack = new Stack<>();
         for (Class<?> plugin : unresolvedDependencies.keySet()) {
             if (!visited.contains(plugin)) {
-                topologicalSort(plugin, sortedDependencies, visited);
+                topologicalSort(plugin, sortedDependencies, visited, stack);
             }
         }
 
         return sortedDependencies;
     }
 
-    private void topologicalSort(Class<?> plugin, List<Class<?>> sortedDependencies, Set<Class<?>> visited) {
+    private void topologicalSort(Class<?> plugin, List<Class<?>> sortedDependencies, Set<Class<?>> visited,
+                                 Stack<Class<?>> dependenciesStack) {
         visited.add(plugin);
+        dependenciesStack.push(plugin);
         List<Class<?>> dependencies = unresolvedDependencies.get(plugin);
         for (Class<?> dep : dependencies) {
             if (!visited.contains(dep)) {
-                topologicalSort(dep, sortedDependencies, visited);
+                topologicalSort(dep, sortedDependencies, visited, dependenciesStack);
+            } else if (dependenciesStack.contains(dep)) {
+                List<Class<?>> cycle = getCycle(dependenciesStack, dep);
+                throw new CycleInDependencyGraph(plugin, cycle);
             }
         }
 
+        dependenciesStack.pop();
         sortedDependencies.add(plugin);
+    }
+
+    private List<Class<?>> getCycle(Stack<Class<?>> dependenciesStack, Class<?> dep) {
+        List<Class<?>> cycle = new ArrayList<>();
+        while (dependenciesStack.peek() != dep) {
+            cycle.add(dependenciesStack.pop());
+        }
+        cycle.add(dependenciesStack.pop());
+        Collections.reverse(cycle);
+        cycle.add(dep);
+        return cycle;
     }
 
     private List<Class<?>> getUnresolvedDependency(Class<?> clazz) {
@@ -76,7 +95,7 @@ public class DependencyGraph {
 
         if (!AnnotationHelper.isPlugin(constructorParameter)) {
             String msg = String.format("Cannot create plugin %s because unknown dependency was found." +
-                    "Please add @Plugin annotation to class %s or add an instance to PluginManager",
+                            "Please add @Plugin annotation to class %s or add an instance to PluginManager",
                     pluginClass, constructorParameter);
             throw new CannotResolveDependency(msg);
         }

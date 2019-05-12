@@ -1,9 +1,11 @@
-package com.github.mateuszjarzyna.plugdozer.dependency;
+package com.github.mateuszjarzyna.plugdozer.manager.dependency;
 
 import com.github.mateuszjarzyna.plugdozer.exception.CannotResolveDependency;
+import com.github.mateuszjarzyna.plugdozer.exception.CycleInDependencyGraph;
 import com.github.mateuszjarzyna.plugdozer.manager.DefaultPluginManager;
 import com.github.mateuszjarzyna.plugdozer.manager.PluginManager;
 import com.github.mateuszjarzyna.plugdozer.testPlugins.*;
+import com.github.mateuszjarzyna.plugdozer.testPlugins.cycle.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -140,6 +142,33 @@ class DependencyGraphTest {
         assertThat(exception.getMessage())
                 .contains("com.github.mateuszjarzyna.plugdozer.testPlugins.SimpleDependencyPlugin")
                 .contains("com.github.mateuszjarzyna.plugdozer.testPlugins.EchoPlugin");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCycleWasFound() {
+        Set<Class<?>> plugins = Stream.of(CyclePlugin1.class, CyclePlugin2.class, CyclePlugin3.class,
+                CyclePlugin4.class, CyclePluginEntry.class)
+                .collect(toSet());
+        DependencyGraph graph = new DependencyGraph(pluginManager, plugins);
+        graph.resolveDependencies();
+
+        CycleInDependencyGraph exception = assertThrows(CycleInDependencyGraph.class, graph::getSortedDependencies);
+        log.info(exception.toString());
+        assertThat(exception.getMessage())
+                .contains("com.github.mateuszjarzyna.plugdozer.testPlugins.cycle.CyclePlugin4")
+                .contains("com.github.mateuszjarzyna.plugdozer.testPlugins.cycle.CyclePlugin2");
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCycleWasFound2() {
+        DependencyGraph graph = new DependencyGraph(pluginManager, singleton(SelfCyclePlugin.class));
+        graph.resolveDependencies();
+
+        CycleInDependencyGraph exception = assertThrows(CycleInDependencyGraph.class, graph::getSortedDependencies);
+        log.info(exception.toString());
+        assertThat(exception.getMessage())
+                .contains("com.github.mateuszjarzyna.plugdozer.testPlugins.SelfCyclePlugin");
+
     }
 
 }
