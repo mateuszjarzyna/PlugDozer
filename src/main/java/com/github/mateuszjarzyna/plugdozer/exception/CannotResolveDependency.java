@@ -6,4 +6,8 @@ public class CannotResolveDependency extends PlugDozerException {
         super(msg);
     }
 
+    public CannotResolveDependency(String msg, Throwable throwable) {
+        super(msg, throwable);
+    }
+
 }

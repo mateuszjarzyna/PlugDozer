@@ -1,10 +1,10 @@
 package com.github.mateuszjarzyna.plugdozer.source;
 
-import java.util.Collection;
+import java.util.Set;
 
 @FunctionalInterface
 public interface PluginSource {
 
-    Collection<Class<?>> loadClasses();
+    Set<Class<?>> loadClasses();
 
 }

@@ -2,6 +2,8 @@ package com.github.mateuszjarzyna.plugdozer.manager;
 
 import com.github.mateuszjarzyna.plugdozer.exception.PluginAlreadyLoaded;
 import com.github.mateuszjarzyna.plugdozer.exception.TooManyPluginsWithGivenType;
+import com.github.mateuszjarzyna.plugdozer.source.PluginSource;
+import com.github.mateuszjarzyna.plugdozer.source.PluginsSource;
 import com.github.mateuszjarzyna.plugdozer.testPlugins.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -223,6 +225,80 @@ class DefaultPluginManagerTest {
         boolean hasPlugin = pluginManager.hasPlugin("testNamedPlugin");
 
         assertThat(hasPlugin).isFalse();
+    }
+
+    @Test
+    void shouldCreatePlugin() {
+        PluginSource source = PluginsSource.simple(EchoPlugin.class, SimpleDependencyPlugin.class);
+        pluginManager.loadPlugins(source);
+
+        Optional<EchoPlugin> instance = pluginManager.getInstance(EchoPlugin.class);
+
+        assertThat(instance).isPresent();
+    }
+
+    @Test
+    void shouldUseExistingInstanceWhenCreatingPlugin() {
+        SimpleDependencyPlugin dependencyPlugin = new SimpleDependencyPlugin();
+        pluginManager.addInstance(dependencyPlugin);
+        PluginSource source = PluginsSource.simple(EchoPlugin.class, SimpleDependencyPlugin.class);
+        pluginManager.loadPlugins(source);
+
+        Optional<EchoPlugin> maybeInstance = pluginManager.getInstance(EchoPlugin.class);
+
+        assertThat(maybeInstance).isPresent();
+        EchoPlugin instance = maybeInstance.get();
+        assertThat(instance.getDependencyPlugin()).isEqualTo(dependencyPlugin);
+    }
+
+    @Test
+    void shouldIgnoreNotProvidedClassesWhenExistInstance() {
+        SimpleDependencyPlugin dependencyPlugin = new SimpleDependencyPlugin();
+        pluginManager.addInstance(dependencyPlugin);
+        PluginSource source = PluginsSource.simple(EchoPlugin.class);
+        pluginManager.loadPlugins(source);
+
+        Optional<EchoPlugin> maybeInstance = pluginManager.getInstance(EchoPlugin.class);
+
+        assertThat(maybeInstance).isPresent();
+        EchoPlugin instance = maybeInstance.get();
+        assertThat(instance.getDependencyPlugin()).isEqualTo(dependencyPlugin);
+    }
+
+    @Test
+    void shouldIgnoreNonPluginClassesInSource() {
+        PluginSource source = PluginsSource.simple(EchoPlugin.class, SimpleDependencyPlugin.class, DummyClass.class);
+        pluginManager.loadPlugins(source);
+
+        Optional<EchoPlugin> echo = pluginManager.getInstance(EchoPlugin.class);
+        Optional<DummyClass> dummyClass = pluginManager.getInstance(DummyClass.class);
+
+        assertThat(echo).isPresent();
+        assertThat(dummyClass).isNotPresent();
+    }
+
+    @Test
+    void shouldInjectPojoClass() {
+        DummyClass pojo = new DummyClass();
+        pluginManager.addInstance(pojo);
+        PluginSource source = PluginsSource.simple(PluginWithPojoAsDependency.class);
+        pluginManager.loadPlugins(source);
+
+        Optional<PluginWithPojoAsDependency> maybeInstance = pluginManager.getInstance(PluginWithPojoAsDependency.class);
+
+        assertThat(maybeInstance).isPresent();
+        PluginWithPojoAsDependency instance = maybeInstance.get();
+        assertThat(instance.getPojo()).isEqualTo(pojo);
+    }
+
+    @Test
+    void shouldCreateAllInstancesOfInterface() {
+        PluginSource source = PluginsSource.simple(EnglishHello.class, JapaneseHello.class);
+        pluginManager.loadPlugins(source);
+
+        List<Hello> instance = pluginManager.getInstances(Hello.class);
+
+        assertThat(instance).hasSize(2);
     }
 
 }

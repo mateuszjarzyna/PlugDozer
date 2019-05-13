@@ -18,4 +18,7 @@ public class EchoPlugin {
         return sentence;
     }
 
+    public SimpleDependencyPlugin getDependencyPlugin() {
+        return dependencyPlugin;
+    }
 }

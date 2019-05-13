@@ -1,6 +1,6 @@
 package com.github.mateuszjarzyna.plugdozer.manager;
 
-import com.github.mateuszjarzyna.plugdozer.annotation.AnnotationHelper;
+import com.github.mateuszjarzyna.plugdozer.annotation.PlugDozerHelper;
 import com.github.mateuszjarzyna.plugdozer.exception.PluginAlreadyLoaded;
 import com.github.mateuszjarzyna.plugdozer.exception.TooManyPluginsWithGivenType;
 import com.github.mateuszjarzyna.plugdozer.source.PluginSource;
@@ -14,14 +14,22 @@ public class DefaultPluginManager implements PluginManager {
     private final Map<String, PluginWrapper<?>> byName;
     private final Map<Class<?>, List<PluginWrapper<?>>> byType;
 
-    public DefaultPluginManager() {
+    DefaultPluginManager() {
         this.byName = new HashMap<>();
         this.byType = new HashMap<>();
     }
 
     @Override
     public void loadPlugins(PluginSource pluginSource) {
-
+        Set<Class<?>> classes = pluginSource.loadClasses();
+        DependencyGraph dependencyGraph = new DependencyGraph(this, classes);
+        dependencyGraph.resolveDependencies();
+        List<PluginConstructorWrapper> sortedDependencies = dependencyGraph.getSortedDependencies();
+        PluginFactory pluginFactory = new PluginFactory(this);
+        for (PluginConstructorWrapper constructorWrapper : sortedDependencies) {
+            Object pluginInstance = pluginFactory.createPlugin(constructorWrapper);
+            addInstance(pluginInstance);
+        }
     }
 
     @Override
@@ -123,8 +131,8 @@ public class DefaultPluginManager implements PluginManager {
     }
 
     private String getName(Object instance) {
-        if (AnnotationHelper.isPlugin(instance)) {
-            return AnnotationHelper.getPluginName(instance);
+        if (PlugDozerHelper.isPlugin(instance)) {
+            return PlugDozerHelper.getPluginName(instance);
         } else {
             return instance.getClass().getName();
         }

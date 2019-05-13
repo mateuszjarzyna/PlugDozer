@@ -1,27 +1,29 @@
-package com.github.mateuszjarzyna.plugdozer.manager.dependency;
+package com.github.mateuszjarzyna.plugdozer.manager;
 
-import com.github.mateuszjarzyna.plugdozer.annotation.AnnotationHelper;
+import com.github.mateuszjarzyna.plugdozer.annotation.PlugDozerHelper;
 import com.github.mateuszjarzyna.plugdozer.exception.CannotResolveDependency;
 import com.github.mateuszjarzyna.plugdozer.exception.CycleInDependencyGraph;
-import com.github.mateuszjarzyna.plugdozer.manager.PluginManager;
 
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class DependencyGraph {
+class DependencyGraph {
 
     private final PluginManager pluginManager;
     private final Set<Class<?>> allClasses;
     private final Map<Class<?>, List<Class<?>>> unresolvedDependencies;
+    private final Map<Class<?>, PluginConstructorWrapper> constructors;
 
-    public DependencyGraph(PluginManager pluginManager, Set<Class<?>> allClasses) {
+    DependencyGraph(PluginManager pluginManager, Set<Class<?>> allClasses) {
         this.pluginManager = pluginManager;
         this.allClasses = allClasses;
         this.unresolvedDependencies = new HashMap<>();
+        this.constructors = new HashMap<>();
     }
 
-    public void resolveDependencies() {
+    void resolveDependencies() {
         for (Class<?> clazz : allClasses) {
             if (isPluginWithoutInstance(clazz)) {
                 List<Class<?>> unresolvedDependency = getUnresolvedDependency(clazz);
@@ -30,7 +32,7 @@ public class DependencyGraph {
         }
     }
 
-    public List<Class<?>> getSortedDependencies() {
+    List<PluginConstructorWrapper> getSortedDependencies() {
         List<Class<?>> sortedDependencies = new ArrayList<>();
         Set<Class<?>> visited = new HashSet<>();
         Stack<Class<?>> stack = new Stack<>();
@@ -40,7 +42,10 @@ public class DependencyGraph {
             }
         }
 
-        return sortedDependencies;
+        return sortedDependencies
+                .stream()
+                .map(constructors::get)
+                .collect(Collectors.toList());
     }
 
     private void topologicalSort(Class<?> plugin, List<Class<?>> sortedDependencies, Set<Class<?>> visited,
@@ -74,6 +79,7 @@ public class DependencyGraph {
 
     private List<Class<?>> getUnresolvedDependency(Class<?> clazz) {
         Constructor<?> constructor = getConstructor(clazz);
+        constructors.put(clazz, new PluginConstructorWrapper(clazz, constructor));
         List<Class<?>> unresolvedParameters = new ArrayList<>();
         for (Class<?> parameter : constructor.getParameterTypes()) {
             if (shouldCreateInstance(parameter, clazz)) {
@@ -85,7 +91,7 @@ public class DependencyGraph {
     }
 
     private boolean isPluginWithoutInstance(Class<?> clazz) {
-        return AnnotationHelper.isPlugin(clazz) && !pluginManager.hasPlugin(clazz);
+        return PlugDozerHelper.isPlugin(clazz) && !pluginManager.hasPlugin(clazz);
     }
 
     private boolean shouldCreateInstance(Class<?> constructorParameter, Class<?> pluginClass) {
@@ -93,7 +99,7 @@ public class DependencyGraph {
             return false;
         }
 
-        if (!AnnotationHelper.isPlugin(constructorParameter)) {
+        if (!PlugDozerHelper.isPlugin(constructorParameter)) {
             String msg = String.format("Cannot create plugin %s because unknown dependency was found." +
                             "Please add @Plugin annotation to class %s or add an instance to PluginManager",
                     pluginClass, constructorParameter);

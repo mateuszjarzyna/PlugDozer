@@ -7,9 +7,14 @@ import javax.inject.Inject;
 @Plugin
 public class PluginWithPojoAsDependency {
 
+    private final DummyClass pojo;
+
     @Inject
     public PluginWithPojoAsDependency(DummyClass dummyClass) {
-
+        pojo = dummyClass;
     }
 
+    public DummyClass getPojo() {
+        return pojo;
+    }
 }

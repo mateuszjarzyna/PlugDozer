@@ -1,9 +1,7 @@
-package com.github.mateuszjarzyna.plugdozer.manager.dependency;
+package com.github.mateuszjarzyna.plugdozer.manager;
 
 import com.github.mateuszjarzyna.plugdozer.exception.CannotResolveDependency;
 import com.github.mateuszjarzyna.plugdozer.exception.CycleInDependencyGraph;
-import com.github.mateuszjarzyna.plugdozer.manager.DefaultPluginManager;
-import com.github.mateuszjarzyna.plugdozer.manager.PluginManager;
 import com.github.mateuszjarzyna.plugdozer.testPlugins.*;
 import com.github.mateuszjarzyna.plugdozer.testPlugins.cycle.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singleton;
@@ -79,7 +78,10 @@ class DependencyGraphTest {
         DependencyGraph graph = new DependencyGraph(pluginManager, plugins);
 
         graph.resolveDependencies();
-        List<Class<?>> sortedDependencies = graph.getSortedDependencies();
+        List<Class<?>> sortedDependencies = graph.getSortedDependencies()
+                .stream()
+                .map(PluginConstructorWrapper::getClazz)
+                .collect(Collectors.toList());
 
         assertThat(sortedDependencies).containsExactly(SimpleDependencyPlugin.class);
     }
@@ -90,7 +92,10 @@ class DependencyGraphTest {
         DependencyGraph graph = new DependencyGraph(pluginManager, plugins);
 
         graph.resolveDependencies();
-        List<Class<?>> sortedDependencies = graph.getSortedDependencies();
+        List<Class<?>> sortedDependencies = graph.getSortedDependencies()
+                .stream()
+                .map(PluginConstructorWrapper::getClazz)
+                .collect(Collectors.toList());
 
         assertThat(sortedDependencies).containsExactly(SimpleDependencyPlugin.class, EchoPlugin.class);
     }
@@ -102,7 +107,10 @@ class DependencyGraphTest {
         DependencyGraph graph = new DependencyGraph(pluginManager, plugins);
 
         graph.resolveDependencies();
-        List<Class<?>> sortedDependencies = graph.getSortedDependencies();
+        List<Class<?>> sortedDependencies = graph.getSortedDependencies()
+                .stream()
+                .map(PluginConstructorWrapper::getClazz)
+                .collect(Collectors.toList());
 
         assertThat(sortedDependencies).containsExactly(SimpleDependencyPlugin.class, EchoPlugin.class,
                 NestedDependencyPlugin.class);
@@ -116,7 +124,10 @@ class DependencyGraphTest {
         DependencyGraph graph = new DependencyGraph(pluginManager, plugins);
 
         graph.resolveDependencies();
-        List<Class<?>> sortedDependencies = graph.getSortedDependencies();
+        List<Class<?>> sortedDependencies = graph.getSortedDependencies()
+                .stream()
+                .map(PluginConstructorWrapper::getClazz)
+                .collect(Collectors.toList());
 
         assertThat(sortedDependencies).containsExactly(EchoPlugin.class,
                 NestedDependencyPlugin.class);
@@ -128,7 +139,10 @@ class DependencyGraphTest {
         DependencyGraph graph = new DependencyGraph(pluginManager, singleton(PluginWithPojoAsDependency.class));
 
         graph.resolveDependencies();
-        List<Class<?>> sortedDependencies = graph.getSortedDependencies();
+        List<Class<?>> sortedDependencies = graph.getSortedDependencies()
+                .stream()
+                .map(PluginConstructorWrapper::getClazz)
+                .collect(Collectors.toList());
 
         assertThat(sortedDependencies).containsExactly(PluginWithPojoAsDependency.class);
     }

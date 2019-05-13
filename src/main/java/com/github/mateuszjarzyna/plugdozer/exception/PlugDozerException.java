@@ -6,4 +6,8 @@ public class PlugDozerException extends RuntimeException {
         super(msg);
     }
 
+    public PlugDozerException(String msg, Throwable throwable) {
+        super(msg, throwable);
+    }
+
 }

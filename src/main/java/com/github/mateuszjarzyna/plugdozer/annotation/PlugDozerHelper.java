@@ -1,6 +1,6 @@
 package com.github.mateuszjarzyna.plugdozer.annotation;
 
-public class AnnotationHelper {
+public class PlugDozerHelper {
 
     public static boolean isPlugin(Object plugin) {
         return isPlugin(plugin.getClass());
