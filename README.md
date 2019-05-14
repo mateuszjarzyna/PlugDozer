@@ -1,7 +1,7 @@
-#PlugDozer
+# PlugDozer
 Modern way to create extensions in Java world
 
-##About
+## About
 PlugDozer is a simple and lightweight micro-framework that allows you to create plugins for your Java application.
 
 Design several interfaces and let third parties create modules/plugins that adds extra features to your application.
