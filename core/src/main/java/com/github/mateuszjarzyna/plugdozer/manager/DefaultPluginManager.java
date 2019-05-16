@@ -9,7 +9,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
-public class DefaultPluginManager implements PluginManager {
+class DefaultPluginManager implements PluginManager {
 
     private final Map<String, PluginWrapper<?>> byName;
     private final Map<Class<?>, List<PluginWrapper<?>>> byType;
