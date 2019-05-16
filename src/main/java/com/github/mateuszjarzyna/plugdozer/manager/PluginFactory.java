@@ -6,15 +6,15 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PluginFactory {
+class PluginFactory {
 
     private final PluginManager pluginManager;
 
-    public PluginFactory(PluginManager pluginManager) {
+    PluginFactory(PluginManager pluginManager) {
         this.pluginManager = pluginManager;
     }
 
-    public Object createPlugin(PluginConstructorWrapper wrapper) {
+    Object createPlugin(PluginConstructorWrapper wrapper) {
         List<Object> parameters = new ArrayList<>();
         Constructor<?> constructor = wrapper.getConstructor();
         for (Class<?> param : constructor.getParameterTypes()) {
