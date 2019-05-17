@@ -7,6 +7,7 @@ import com.github.mateuszjarzyna.plugdozer.source.PluginSource;
 
 import java.util.*;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 class DefaultPluginManager implements PluginManager {
@@ -80,6 +81,10 @@ class DefaultPluginManager implements PluginManager {
     @Override
     @SuppressWarnings("unchecked")
     public <P> List<P> getInstances(Class<?> clazz) {
+        if (!byType.containsKey(clazz)) {
+            return emptyList();
+        }
+
         return byType.get(clazz)
                 .stream()
                 .map(pw -> maybeGetInstance(clazz, pw))

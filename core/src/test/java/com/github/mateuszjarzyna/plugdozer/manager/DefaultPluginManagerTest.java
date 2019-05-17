@@ -301,4 +301,11 @@ class DefaultPluginManagerTest {
         assertThat(instance).hasSize(2);
     }
 
+    @Test
+    void shouldReturnEmptyListWhenThereIsNoPluginWithGivenType() {
+        List<Object> plugins = pluginManager.getInstances(Hello.class);
+
+        assertThat(plugins).isEmpty();
+    }
+
 }
