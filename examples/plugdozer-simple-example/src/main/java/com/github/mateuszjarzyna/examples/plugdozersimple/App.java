@@ -5,7 +5,7 @@ import com.github.mateuszjarzyna.examples.plugdozersimple.plugin.Hello;
 import com.github.mateuszjarzyna.examples.plugdozersimple.plugin.ItalianHello;
 import com.github.mateuszjarzyna.examples.plugdozersimple.plugin.PolishHello;
 import com.github.mateuszjarzyna.plugdozer.manager.PluginManager;
-import com.github.mateuszjarzyna.plugdozer.manager.PluginsManager;
+import com.github.mateuszjarzyna.plugdozer.manager.PluginManagers;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +17,7 @@ public class App {
 
     public static void main(String[] args) {
         // Create plugin manager
-        PluginManager pluginManager = PluginsManager.defaultManager();
+        PluginManager pluginManager = PluginManagers.defaultManager();
 
         // Add plugins' instances
         pluginManager.addInstance(new EnglishHello());

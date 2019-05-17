@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
-public class PluginsSource {
+public class PluginSources {
 
     public static PluginSource simple(Class<?>... pluginClasses) {
         return simple(Arrays.asList(pluginClasses));

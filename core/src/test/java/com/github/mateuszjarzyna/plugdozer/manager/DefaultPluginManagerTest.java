@@ -3,7 +3,7 @@ package com.github.mateuszjarzyna.plugdozer.manager;
 import com.github.mateuszjarzyna.plugdozer.exception.PluginAlreadyLoaded;
 import com.github.mateuszjarzyna.plugdozer.exception.TooManyPluginsWithGivenType;
 import com.github.mateuszjarzyna.plugdozer.source.PluginSource;
-import com.github.mateuszjarzyna.plugdozer.source.PluginsSource;
+import com.github.mateuszjarzyna.plugdozer.source.PluginSources;
 import com.github.mateuszjarzyna.plugdozer.testPlugins.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -229,7 +229,7 @@ class DefaultPluginManagerTest {
 
     @Test
     void shouldCreatePlugin() {
-        PluginSource source = PluginsSource.simple(EchoPlugin.class, SimpleDependencyPlugin.class);
+        PluginSource source = PluginSources.simple(EchoPlugin.class, SimpleDependencyPlugin.class);
         pluginManager.loadPlugins(source);
 
         Optional<EchoPlugin> instance = pluginManager.getInstance(EchoPlugin.class);
@@ -241,7 +241,7 @@ class DefaultPluginManagerTest {
     void shouldUseExistingInstanceWhenCreatingPlugin() {
         SimpleDependencyPlugin dependencyPlugin = new SimpleDependencyPlugin();
         pluginManager.addInstance(dependencyPlugin);
-        PluginSource source = PluginsSource.simple(EchoPlugin.class, SimpleDependencyPlugin.class);
+        PluginSource source = PluginSources.simple(EchoPlugin.class, SimpleDependencyPlugin.class);
         pluginManager.loadPlugins(source);
 
         Optional<EchoPlugin> maybeInstance = pluginManager.getInstance(EchoPlugin.class);
@@ -255,7 +255,7 @@ class DefaultPluginManagerTest {
     void shouldIgnoreNotProvidedClassesWhenExistInstance() {
         SimpleDependencyPlugin dependencyPlugin = new SimpleDependencyPlugin();
         pluginManager.addInstance(dependencyPlugin);
-        PluginSource source = PluginsSource.simple(EchoPlugin.class);
+        PluginSource source = PluginSources.simple(EchoPlugin.class);
         pluginManager.loadPlugins(source);
 
         Optional<EchoPlugin> maybeInstance = pluginManager.getInstance(EchoPlugin.class);
@@ -267,7 +267,7 @@ class DefaultPluginManagerTest {
 
     @Test
     void shouldIgnoreNonPluginClassesInSource() {
-        PluginSource source = PluginsSource.simple(EchoPlugin.class, SimpleDependencyPlugin.class, DummyClass.class);
+        PluginSource source = PluginSources.simple(EchoPlugin.class, SimpleDependencyPlugin.class, DummyClass.class);
         pluginManager.loadPlugins(source);
 
         Optional<EchoPlugin> echo = pluginManager.getInstance(EchoPlugin.class);
@@ -281,7 +281,7 @@ class DefaultPluginManagerTest {
     void shouldInjectPojoClass() {
         DummyClass pojo = new DummyClass();
         pluginManager.addInstance(pojo);
-        PluginSource source = PluginsSource.simple(PluginWithPojoAsDependency.class);
+        PluginSource source = PluginSources.simple(PluginWithPojoAsDependency.class);
         pluginManager.loadPlugins(source);
 
         Optional<PluginWithPojoAsDependency> maybeInstance = pluginManager.getInstance(PluginWithPojoAsDependency.class);
@@ -293,7 +293,7 @@ class DefaultPluginManagerTest {
 
     @Test
     void shouldCreateAllInstancesOfInterface() {
-        PluginSource source = PluginsSource.simple(EnglishHello.class, JapaneseHello.class);
+        PluginSource source = PluginSources.simple(EnglishHello.class, JapaneseHello.class);
         pluginManager.loadPlugins(source);
 
         List<Hello> instance = pluginManager.getInstances(Hello.class);
