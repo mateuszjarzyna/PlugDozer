@@ -112,7 +112,7 @@ class JarSource implements PluginSource {
     private List<Path> getJars() {
         try {
             return Files.list(directoryWithJars)
-                    .filter(f -> f.endsWith(JAR_FILE_EXTENSION))
+                    .filter(f -> f.toString().endsWith(JAR_FILE_EXTENSION))
                     .collect(toList());
         } catch (IOException e) {
             String msg = String.format("Cannot read directory %s. %s", directoryWithJars, e.getMessage());
